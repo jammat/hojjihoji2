@@ -1,12 +1,12 @@
 package server;
 
-public class Conveyer extends Thread{
+public class ruuvikuljetin extends Thread{
 	
 	protected boolean running;
 	protected final int transferAmount = 2;
 	protected final int waitTime = 10;
 	
-	public Conveyer(){
+	public ruuvikuljetin(){
 		
 	}
 	
