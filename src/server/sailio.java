@@ -1,6 +1,6 @@
 package server;
 
-public class Tank extends Thread{
+public class sailio extends Thread{
 
 	private int tilavuus = 10000;
 	private int amountOfLiquid;
@@ -9,7 +9,7 @@ public class Tank extends Thread{
 	private int pump;
 	private int bottlepump;
 	
-	public Tank(){
+	public sailio(){
 		amountOfLiquid=0;
 		reserved=false;
 		tila=KoneenTila.FREE;
