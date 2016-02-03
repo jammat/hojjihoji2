@@ -1,4 +1,4 @@
-package hojitehdas;
+package server;
 
 public class pulloPumppu {
 	
