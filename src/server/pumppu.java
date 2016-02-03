@@ -1,10 +1,10 @@
 package server;
 
-public class Pump extends Thread{
+public class pumppu extends Thread{
 	
 	protected boolean running;
 	
-	public Pump(){
+	public pumppu(){
 		running=false;
 	}
 	
