@@ -15,12 +15,9 @@ import javax.swing.JToggleButton;
 
 import server.tehtaanOlemus;
 
-// Kommentoin pois importit, joita ilmeisesti ei tarvita
 
-/**
- *
- * @author jaanle
- */
+
+
 public class MainWindow extends javax.swing.JFrame {
 	
 	private String osoite;
