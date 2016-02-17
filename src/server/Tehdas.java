@@ -53,8 +53,8 @@ import server.sailioPumppu;
 		
 		// ULOSKIRJOITUS
 		public void logout(UUID idKey) throws RemoteException {
-			userIdKeys.remove(idKey);
 			System.out.println("kayttaja " + userIdKeys.get(idKey) + ", " + idKey + " kirjautui ulos.");
+				userIdKeys.remove(idKey);
 		}
 		
 		//-------- Ruuvikuljettimet -------------
