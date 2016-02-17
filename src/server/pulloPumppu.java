@@ -28,7 +28,7 @@ package server;
 	}
 	
 	@Override
-	public void stoppumppu(){
+	public void stopPump(){
 		running = false;
 		if(tankToBeEmptied != -1){
 			sailiot[tankToBeEmptied].setTila(KoneenTila.FREE);
