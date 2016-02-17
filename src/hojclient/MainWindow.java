@@ -5,21 +5,53 @@
  */
 package hojclient;
 
-//MUISTA LISATA KANSIOON HOJCLIENT KANSIO ICONS
+import java.awt.event.WindowAdapter;
+import java.rmi.*;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.util.UUID;
+import javax.swing.JLabel;
+import javax.swing.JToggleButton;
+
+import hojserver.Tehdas;
+
+// Kommentoin pois importit, joita ilmeisesti ei tarvita
 
 /**
  *
  * @author jaanle
  */
 public class MainWindow extends javax.swing.JFrame {
+	
+	private String osoite;
+	private String kayttajaNimi;
+	private Tehdas tehdas;
+	private Registry registry;
+	protected boolean online;
+	private UUID userId; 
 
+	private JLabel[] siloLabels;
+	private JLabel[] processorLabels;
+	private JLabel[] tankLabels;
+	private JLabel[] conveyerStatus;
+	private JLabel[] pumpStatus;
+	private JLabel[] processorStatus;
+	private JLabel[] processorAmount;
+	private JToggleButton[] conveyerStartButtons;
+	private JToggleButton[] reserveSiloButtons;
+	private JToggleButton[] reserveProcessorButtons;
+	private JToggleButton[] startProcessorButtons;
+	private JToggleButton[] startPumpButtons;
+	private JToggleButton[] reserveTankButtons;
+	
     /**
      * Creates new form MainWindow
      */
-    public MainWindow() {
+    public MainWindow(String o) {
+    	osoite = o;
         initComponents();
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -121,8 +153,41 @@ public class MainWindow extends javax.swing.JFrame {
         procLoadAmount1 = new javax.swing.JTextField();
         procLoadAmount2 = new javax.swing.JTextField();
 
+        //Listat
+        siloLabels = new JLabel[]{silo1Status, silo2Status, silo3Status, silo4Status};
+        processorLabels = new JLabel[]{proc1User, proc2User, proc3User};
+    	tankLabels = new JLabel[]{tank1Status, tank2Status, tank3Status, tank4Status, tank5Status, tank6Status, tank7Status, tank8Status, tank9Status, tank10Status};
+        
+    	conveyerStatus = new JLabel[]{siloLoadConvStatus, ProcLoadConvStatus1,procLoadConvStatus2};
+    	pumpStatus = new JLabel[]{pump1Status, pump2Status, bpump1Status, bpump2Status};
+    	processorStatus = new JLabel[]{proc1Status, proc2Status, proc3Status};
+    	processorAmount = new JLabel[]{proc1Label, proc2Label, proc3Label};
+    	
+    	//Buttons that start the conveyers
+    	conveyerStartButtons = new JToggleButton[]{startSiloLoad, startProcLoad1, startProcLoad2};
+    	
+    	//Buttons that reserve silos
+    	reserveSiloButtons = new JToggleButton[]{reserveSilo1, reserveSilo2, reserveSilo3, reserveSilo4};
+    	
+    	//Buttons that reserve processors
+    	reserveProcessorButtons = new JToggleButton[]{reserveProc1, reserveProc2, reserveProc3};
+    	
+    	//Buttons that start processors
+    	startProcessorButtons = new JToggleButton[]{startProc1, startProc2, startProc3};
+    	
+    	//Buttons that start pumps
+    	startPumpButtons = new JToggleButton[]{startPump1, startPump2, startBpump1, startBpump2};
+    	
+    	//Buttons that reserve tanks
+    	reserveTankButtons = new JToggleButton[]{
+    			reserveTank1, reserveTank2, reserveTank3, reserveTank4, reserveTank5,
+    			reserveTank6, reserveTank7, reserveTank8, reserveTank9, reserveTank10};
+    	
+    	
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
+
+        
         siloPanel.setBackground(new java.awt.Color(204, 204, 204));
 
         silo1Label.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -607,7 +672,7 @@ public class MainWindow extends javax.swing.JFrame {
         proc1Status.setPreferredSize(new java.awt.Dimension(100, 20));
 
         proc1Label.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        proc1Label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/hojclient/icons/conveyor.jpg"))); // NOI18N
+        proc1Label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/hojclient/icons/processor.jpg"))); // NOI18N
         proc1Label.setText("Processor 1");
         proc1Label.setFocusable(false);
         proc1Label.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -621,7 +686,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
 
         proc2Label.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        proc2Label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/hojclient/icons/conveyor.jpg"))); // NOI18N
+        proc2Label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/hojclient/icons/processor.jpg"))); // NOI18N
         proc2Label.setText("Processor 2");
         proc2Label.setFocusable(false);
         proc2Label.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -675,7 +740,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
 
         proc3Label.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        proc3Label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/hojclient/icons/conveyor.jpg"))); // NOI18N
+        proc3Label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/hojclient/icons/processor.jpg"))); // NOI18N
         proc3Label.setText("Processor 3");
         proc3Label.setFocusable(false);
         proc3Label.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1082,126 +1147,702 @@ public class MainWindow extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+    
+    
+    // ****************** KUUNTELIJAT ****************** //
 
+    // --------------- START SILO CONVEYER --------------------
     private void startSiloLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startSiloLoadActionPerformed
-        // TODO Mitä tehdään, kun siilojen täytön ruuvikuljetin käynnistetään?
+        // MitÃ¤ tehdÃ¤Ã¤n, kun siilojen tÃ¤ytÃ¶n ruuvikuljetin kÃ¤ynnistetÃ¤Ã¤n?
+    	if (signIn.isSelected()){
+    		if (conveyerStartButtons[0].isSelected()){
+    			try{
+    				tehdas.ruuvihihnanKaynnistys();
+    			}catch (RemoteException e) {System.out.println(e);}
+    		}//conv
+    		else{
+    			try{
+    			tehdas.ruuvihihnanKaynnistysVapautus();
+    			} catch (RemoteException e) {System.out.println(e);}
+    		}
+    	}//if log
     }//GEN-LAST:event_startSiloLoadActionPerformed
 
+    // --------------- SIGN IN & OUT -------------------------
     private void signInActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_signInActionPerformed
-        // TODO Mitä tehdään kun käyttäjä kirjautuu
+        // MitÃ¤ tehdÃ¤Ã¤n kun kÃ¤yttÃ¤jÃ¤ kirjautuu
+    	
+    	// Onko jo login painettu?
+    	if (signIn.isSelected()){
+    		if (userName.getText().contentEquals("") || userName.getText() == null){
+    			System.out.println("Anna kÃ¤yttÃ¤jÃ¤nimi!");
+    			signIn.setSelected(false);
+    		}// if nimi kirjoitettu
+    		else if (userName.getText().length() >= 20){
+    			System.out.println("KÃ¤yttÃ¤jÃ¤nimen tulee olla alle 20 merkkiÃ¤!");
+    			signIn.setSelected(false);
+    		}
+    		else{
+		    	String RMIosoite ="tehdas";	
+		    	try {
+		    		registry = LocateRegistry.getRegistry(osoite, 2020);
+		    		tehdas = (Tehdas) registry.lookup(RMIosoite); 	
+		    	} catch (Exception e){System.out.println(e);}
+		    	
+		    	// Otetaan kirjoitettu kÃ¤yttÃ¤jÃ¤nimi talteen
+		    	kayttajaNimi = userName.getText();
+		    	
+		    	signIn.setText("Log out");
+
+		    	try{
+		    		//Otetaan kÃ¤yttÃ¤jÃ¤n henk. koht. userId talteen
+		    		userId = tehdas.login(kayttajaNimi);
+		    	}catch (RemoteException e){
+		    		System.out.println(e);
+		    	}
+		    	
+		    	 //HANDLING EXIT BY PRESSING X
+		        addWindowListener(new WindowAdapter(){
+		        	public void windowClosing(WindowEvent e ) 
+		            {
+		              try {
+		            	//Kirjataan kÃ¤yttÃ¤jÃ¤ ulos  
+						tehdas.logout(userId);
+						
+					} catch (RemoteException e1) {
+						e1.printStackTrace();
+					}
+		              dispose() ;
+		              System.exit( 0 );
+		            }
+		        });
+		    	
+		    	online = true;
+		    	new BackgroundUpdater(this).start();
+		    	
+    		}//else
+    	} // if signin
+    	
+    	// ULOSKIRJAUTUMINEN
+    	// Jos login nappi on alhaalla niin Uloskirjaus
+    	else{
+    		try{
+    			tehdas.logout(userId);
+    		} catch(RemoteException e){
+    			e.printStackTrace();
+    		}
+    		registry = null;		//KeskeytetÃ¤Ã¤n yhteys ja ...
+    		online = false;			//...PysÃ¤ytetÃ¤Ã¤n BackgroundUpdater thread	
+    		
+    		signIn.setText("Log in");
+    		
+    	}
+    	
+    	
     }//GEN-LAST:event_signInActionPerformed
 
+    //---------------- START/STOP PROCESSOR CONVEYER 1 --------------------
     private void startProcLoad1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startProcLoad1ActionPerformed
-        // TODO Mitä tehdään kun keittimen täytön ruuvikuljetin 1 käynnistetään
-    }//GEN-LAST:event_startProcLoad1ActionPerformed
-
-    private void startProcLoad2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startProcLoad2ActionPerformed
-        // TODO Mitä tehdään kun keittimen täytön ruuvikuljetin 1 käynnistetään
+        //  MitÃ¤ tehdÃ¤Ã¤n kun keittimen tÃ¤ytÃ¶n ruuvikuljetin 1 kÃ¤ynnistetÃ¤Ã¤n
+    	if (signIn.isSelected()){
+    		if (conveyerStartButtons[1].isSelected()){
+    			
+    			int maaraInt;
+    			String maara = procLoadAmount1.getText();
+    			
+    			// Annettiinko mitÃ¤Ã¤n arvoa?
+    			if (maara.contentEquals("")){
+    				maaraInt = -1;
+    			}
+    			else{
+		    		try {
+		    			maaraInt = Integer.parseInt(maara);
+		   			} catch (NumberFormatException e) {
+		    			maaraInt = -1;
+		    			System.out.println("Load processor: Not valid value!");
+		    		}
+    			}
+    			try{
+    				tehdas.prosessorinLataus(1, maaraInt);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		}
+    		else{
+    			try{
+    			tehdas.prosessorinLatausVapautus(1);
+    			} catch (RemoteException e) {System.out.println(e);}
+    		}// if start
+    	}// if log
     }//GEN-LAST:event_startProcLoad2ActionPerformed
 
+    //---------------- START/STOP PROCESSOR CONVEYER 2 --------------------
+    private void startProcLoad2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startProcLoad2ActionPerformed
+        //  MitÃ¤ tehdÃ¤Ã¤n kun keittimen tÃ¤ytÃ¶n ruuvikuljetin 2 kÃ¤ynnistetÃ¤Ã¤n
+    	if (signIn.isSelected()){
+    		if (conveyerStartButtons[2].isSelected()){
+    			
+    			int maaraInt;
+    			String maara = procLoadAmount2.getText();
+    			
+    			// Annettiinko mitÃ¤Ã¤n arvoa?
+    			if (maara.contentEquals("")){
+    				maaraInt = -1;
+    			}
+    			else{
+		    		try {
+		    			maaraInt = Integer.parseInt(maara);
+		   			} catch (NumberFormatException e) {
+		    			maaraInt = -1;
+		    			System.out.println("Load processor: Not valid value!");
+		    		}
+    			}
+    			try{
+    				tehdas.prosessorinLataus(2, maaraInt);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		}
+    		else{
+    			try{
+    			tehdas.prosessorinLatausVapautus(2);
+    			} catch (RemoteException e) {System.out.println(e);}
+    		}// if start
+    	}// if log
+    }//GEN-LAST:event_startProcLoad2ActionPerformed
+
+  //---------------- RESERVE/UNRESERVE SILO 1 --------------------
     private void reserveSilo1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveSilo1ActionPerformed
-        // TODO Mitä tehdään kun siilo1 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun siilo1 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveSiloButtons[0].isSelected()){
+    			try{
+    				tehdas.siilonVaraus(0);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		}
+			else{
+				try{
+					tehdas.siilonVarausVapautus(0);
+				} catch (RemoteException e) {System.out.println(e);}
+			}// else
+    	}
     }//GEN-LAST:event_reserveSilo1ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE SILO 2 --------------------
     private void reserveSilo2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveSilo2ActionPerformed
-        // TODO Mitä tehdään kun siilo2 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun siilo2 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveSiloButtons[1].isSelected()){
+    			try{
+    				tehdas.siilonVaraus(1);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		}// if res 
+			else{
+				try{
+					tehdas.siilonVarausVapautus(1);
+				} catch (RemoteException e) {System.out.println(e);}
+			}// else
+    	}
     }//GEN-LAST:event_reserveSilo2ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE SILO 3 --------------------    
     private void reserveSilo3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveSilo3ActionPerformed
-        // TODO Mitä tehdään kun siilo3 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun siilo3 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveSiloButtons[2].isSelected()){
+    			try{
+    				tehdas.siilonVaraus(2);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		}// if res
+			else{
+				try{
+					tehdas.siilonVarausVapautus(2);
+				} catch (RemoteException e) {System.out.println(e);}
+			}// else
+    	}
     }//GEN-LAST:event_reserveSilo3ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE SILO 4 --------------------    
     private void reserveSilo4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveSilo4ActionPerformed
-        // TODO Mitä tehdään kun siilo4 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun siilo4 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveSiloButtons[3].isSelected()){
+    			try{
+    				tehdas.siilonVaraus(3);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		}// if res
+			else{
+				try{
+					tehdas.siilonVarausVapautus(3);
+				} catch (RemoteException e) {System.out.println(e);}
+			}// else
+    	}
     }//GEN-LAST:event_reserveSilo4ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE PROCESSOR 1 --------------------
     private void reserveProc1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveProc1ActionPerformed
-        // TODO Mitä tehdään kun keitin1 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun keitin1 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveProcessorButtons[0].isSelected()){
+	    		try{
+	    			tehdas.prosessorinVaraus(0, userId);
+	    		}catch (RemoteException e) {System.out.println(e);}
+	    	}// if res
+			else{
+				try{
+					tehdas.prosessorinVarausVapautus(0, userId);
+				} catch (RemoteException e) {System.out.println(e);}
+			}// else
+    	}// if log
     }//GEN-LAST:event_reserveProc1ActionPerformed
 
+    //---------------- START/STOP PROCESSOR 1 --------------------
     private void startProc1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startProc1ActionPerformed
-        // TODO Mitä tehdään kun keitin1 käynnistetään?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun keitin1 kÃ¤ynnistetÃ¤Ã¤n?
+    	if (signIn.isSelected()){
+    		if (startProcessorButtons[0].isSelected()){
+	    		try{
+	    			tehdas.prosessorinKaynnistys(0, userId);;
+	    		}catch (RemoteException e) {System.out.println(e);}
+	    	}// if res
+			else{
+				try{
+					tehdas.prosessorinKaynnistysVapautus(0);
+				} catch (RemoteException e) {System.out.println(e);}
+			}// else
+    	}// if log
     }//GEN-LAST:event_startProc1ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE PROCESSOR 2 --------------------
     private void reserveProc2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveProc2ActionPerformed
-        // TODO Mitä tehdään kun keitin2 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun keitin2 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveProcessorButtons[1].isSelected()){
+	    		try{
+	    			tehdas.prosessorinVaraus(1, userId);
+	    		}catch (RemoteException e) {System.out.println(e);}
+	    	}// if res
+			else{
+				try{
+					tehdas.prosessorinVarausVapautus(1, userId);
+				} catch (RemoteException e) {System.out.println(e);}
+			}// else
+    	}// if log
     }//GEN-LAST:event_reserveProc2ActionPerformed
 
+    //---------------- START/STOP PROCESSOR 2 --------------------
     private void startProc2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startProc2ActionPerformed
-        // TODO Mitä tehdään kun keitin2 käynnistetään?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun keitin2 kÃ¤ynnistetÃ¤Ã¤n?
+    	if (signIn.isSelected()){
+    		if (startProcessorButtons[1].isSelected()){
+	    		try{
+	    			tehdas.prosessorinKaynnistys(1, userId);;
+	    		}catch (RemoteException e) {System.out.println(e);}
+	    	}// if res
+			else{
+				try{
+					tehdas.prosessorinKaynnistysVapautus(1);
+				} catch (RemoteException e) {System.out.println(e);}
+			}// else
+    	}// if log
     }//GEN-LAST:event_startProc2ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE PROCESSOR 3 --------------------
     private void reserveProc3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveProc3ActionPerformed
-        // TODO Mitä tehdään kun keitin3 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun keitin3 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveProcessorButtons[2].isSelected()){
+	    		try{
+	    			tehdas.prosessorinVaraus(2, userId);
+	    		}catch (RemoteException e) {System.out.println(e);}
+	    	}// if res
+			else{
+				try{
+					tehdas.prosessorinVarausVapautus(2, userId);
+				} catch (RemoteException e) {System.out.println(e);}
+			}// else
+    	}// if log
     }//GEN-LAST:event_reserveProc3ActionPerformed
 
+    //---------------- START/STOP PROCESSOR 3 --------------------
     private void startProc3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startProc3ActionPerformed
-        // TODO Mitä tehdään kun keitin3 käynnistetään?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun keitin3 kÃ¤ynnistetÃ¤Ã¤n?
+    	if (signIn.isSelected()){
+    		if (startProcessorButtons[2].isSelected()){
+	    		try{
+	    			tehdas.prosessorinKaynnistys(2, userId);;
+	    		}catch (RemoteException e) {System.out.println(e);}
+	    	}// if res
+			else{
+				try{
+					tehdas.prosessorinKaynnistysVapautus(2);
+				} catch (RemoteException e) {System.out.println(e);}
+			}// else
+    	}// if log
     }//GEN-LAST:event_startProc3ActionPerformed
 
+  //---------------- START/STOP PROCESSOR PUMP 1 --------------------
     private void startPump1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startPump1ActionPerformed
-        // TODO Mitä tehdään kun pumppu1 käynnistetään?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun pumppu1 kÃ¤ynnistetÃ¤Ã¤n?
+    	if (signIn.isSelected()){
+    		if (startPumpButtons[0].isSelected()){
+    			try{
+	    			tehdas.sailoidenTaytto(0);
+	    		}catch (RemoteException e) {System.out.println(e);}
+    		}// if start
+			else{
+				try{
+					tehdas.sailoidenTayttoVapautus(0);
+				} catch (RemoteException e) {System.out.println(e);}
+			}// else
+    	}// if log
     }//GEN-LAST:event_startPump1ActionPerformed
 
+    //---------------- START/STOP PROCESSOR PUMP 2 --------------------
     private void startPump2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startPump2ActionPerformed
-        // TODO Mitä tehdään kun pumppu2 käynnistetään?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun pumppu2 kÃ¤ynnistetÃ¤Ã¤n?
+    	if (signIn.isSelected()){
+    		if (startPumpButtons[1].isSelected()){
+    			try{
+	    			tehdas.sailoidenTaytto(1);
+	    		}catch (RemoteException e) {System.out.println(e);}
+    		}// if start
+			else{
+				try{
+					tehdas.sailoidenTayttoVapautus(1);
+				} catch (RemoteException e) {System.out.println(e);}
+			}// else
+    	}// if log
     }//GEN-LAST:event_startPump2ActionPerformed
 
+    //---------------- START/STOP BOTTLE PUMP 1 --------------------
     private void startBpump1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startBpump1ActionPerformed
-        // TODO Mitä tehdään kun pumppu1 pullotukseen käynnistetään?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun pumppu1 pullotukseen kÃ¤ynnistetÃ¤Ã¤n?
+    	if (signIn.isSelected()){
+	    	if(startPumpButtons[2].isSelected()){
+	    		try{
+	    			tehdas.pullojenTaytto(2);
+	    		}catch (RemoteException e) {System.out.println(e);}
+	    	}// if start
+			else{
+				try{
+					tehdas.pullojenTayttoVapautus(2);
+				} catch (RemoteException e) {System.out.println(e);}
+			}// else
+	    }// if log
     }//GEN-LAST:event_startBpump1ActionPerformed
 
+    //---------------- START/STOP BOTTLE PUMP 2 --------------------
     private void startBpump2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startBpump2ActionPerformed
-        // TODO Mitä tehdään kun pumppu2 pullotukseen käynnistetään?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun pumppu2 pullotukseen kÃ¤ynnistetÃ¤Ã¤n?
+    	if (signIn.isSelected()){
+	    	if(startPumpButtons[3].isSelected()){
+	    		try{
+	    			tehdas.pullojenTaytto(3);
+	    		}catch (RemoteException e) {System.out.println(e);}
+	    	}// if start
+			else{
+				try{
+					tehdas.pullojenTayttoVapautus(3);
+				} catch (RemoteException e) {System.out.println(e);}
+			}// else
+	    }// if log
     }//GEN-LAST:event_startBpump2ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE TANK 1 --------------------
     private void reserveTank1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveTank1ActionPerformed
-        // TODO Mitä tehdään kun säiliö1 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun sÃ¤iliÃ¶1 varataan?
+	    	if (signIn.isSelected()){
+	    		if (reserveTankButtons[0].isSelected()){
+	    			try{
+	    				tehdas.sailionVaraus(0);
+	    			}catch (RemoteException e) {System.out.println(e);}
+	    		} //if start
+	    		else{
+					try{
+						tehdas.sailionVarausVapautus(0);
+					} catch (RemoteException e) {System.out.println(e);}
+				}//else	
+	    }// if log
     }//GEN-LAST:event_reserveTank1ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE TANK 2 --------------------
     private void reserveTank2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveTank2ActionPerformed
-        // TODO Mitä tehdään kun säiliö2 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun sÃ¤iliÃ¶2 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveTankButtons[1].isSelected()){
+    			try{
+    				tehdas.sailionVaraus(1);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		} //if start
+    		else{
+				try{
+					tehdas.sailionVarausVapautus(1);
+				} catch (RemoteException e) {System.out.println(e);}
+			}//else	
+    }// if log
     }//GEN-LAST:event_reserveTank2ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE TANK 3 --------------------
     private void reserveTank3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveTank3ActionPerformed
-        // TODO Mitä tehdään kun säiliö3 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun sÃ¤iliÃ¶3 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveTankButtons[2].isSelected()){
+    			try{
+    				tehdas.sailionVaraus(2);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		} //if start
+    		else{
+				try{
+					tehdas.sailionVarausVapautus(2);
+				} catch (RemoteException e) {System.out.println(e);}
+			}//else	
+    }// if log
     }//GEN-LAST:event_reserveTank3ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE TANK 4 --------------------
     private void reserveTank4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveTank4ActionPerformed
-        // TODO Mitä tehdään kun säiliö4 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun sÃ¤iliÃ¶4 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveTankButtons[3].isSelected()){
+    			try{
+    				tehdas.sailionVaraus(3);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		} //if start
+    		else{
+				try{
+					tehdas.sailionVarausVapautus(3);
+				} catch (RemoteException e) {System.out.println(e);}
+			}//else	
+    }// if log
     }//GEN-LAST:event_reserveTank4ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE TANK 5 --------------------
     private void reserveTank5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveTank5ActionPerformed
-        // TODO Mitä tehdään kun säiliö5 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun sÃ¤iliÃ¶5 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveTankButtons[4].isSelected()){
+    			try{
+    				tehdas.sailionVaraus(4);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		} //if start
+    		else{
+				try{
+					tehdas.sailionVarausVapautus(4);
+				} catch (RemoteException e) {System.out.println(e);}
+			}//else	
+    }// if log
     }//GEN-LAST:event_reserveTank5ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE TANK 6 --------------------
     private void reserveTank6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveTank6ActionPerformed
-        // TODO Mitä tehdään kun säiliö6 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun sÃ¤iliÃ¶6 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveTankButtons[5].isSelected()){
+    			try{
+    				tehdas.sailionVaraus(5);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		} //if start
+    		else{
+				try{
+					tehdas.sailionVarausVapautus(5);
+				} catch (RemoteException e) {System.out.println(e);}
+			}//else	
+    }// if log
     }//GEN-LAST:event_reserveTank6ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE TANK 7 --------------------
     private void reserveTank7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveTank7ActionPerformed
-        // TODO Mitä tehdään kun säiliö7 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun sÃ¤iliÃ¶7 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveTankButtons[6].isSelected()){
+    			try{
+    				tehdas.sailionVaraus(6);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		} //if start
+    		else{
+				try{
+					tehdas.sailionVarausVapautus(6);
+				} catch (RemoteException e) {System.out.println(e);}
+			}//else	
+    }// if log
     }//GEN-LAST:event_reserveTank7ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE TANK 8 --------------------
     private void reserveTank8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveTank8ActionPerformed
-        // TODO Mitä tehdään kun säiliö8 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun sÃ¤iliÃ¶8 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveTankButtons[7].isSelected()){
+    			try{
+    				tehdas.sailionVaraus(7);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		} //if start
+    		else{
+				try{
+					tehdas.sailionVarausVapautus(7);
+				} catch (RemoteException e) {System.out.println(e);}
+			}//else	
+    }// if log
     }//GEN-LAST:event_reserveTank8ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE TANK 9 --------------------
     private void reserveTank9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveTank9ActionPerformed
-        // TODO Mitä tehdään kun säiliö9 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun sÃ¤iliÃ¶9 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveTankButtons[8].isSelected()){
+    			try{
+    				tehdas.sailionVaraus(8);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		} //if start
+    		else{
+				try{
+					tehdas.sailionVarausVapautus(8);
+				} catch (RemoteException e) {System.out.println(e);}
+			}//else	
+    }// if log
     }//GEN-LAST:event_reserveTank9ActionPerformed
 
+    //---------------- RESERVE/UNRESERVE TANK 10 --------------------
     private void reserveTank10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveTank10ActionPerformed
-        // TODO Mitä tehdään kun säiliö10 varataan?
+        //  MitÃ¤ tehdÃ¤Ã¤n kun sÃ¤iliÃ¶10 varataan?
+    	if (signIn.isSelected()){
+    		if (reserveTankButtons[9].isSelected()){
+    			try{
+    				tehdas.sailionVaraus(9);
+    			}catch (RemoteException e) {System.out.println(e);}
+    		} //if start
+    		else{
+				try{
+					tehdas.sailionVarausVapautus(9);
+				} catch (RemoteException e) {System.out.println(e);}
+			}//else	
+    }// if log
     }//GEN-LAST:event_reserveTank10ActionPerformed
 
+    //---------------- TURHIA  --------------------
     private void procLoadAmount2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_procLoadAmount2ActionPerformed
-        // TODO add your handling code here:
+        //  Prosessoreiden tÃ¤ytÃ¶n mÃ¤Ã¤rÃ¤
+    	
+    	// Jos prosessoreiden tÃ¤ytÃ¶n mÃ¤Ã¤rÃ¤n kentÃ¤ssÃ¤ painetaan enteriÃ¤
+    	// TÃ¤tÃ¤ ei siis tarvita. Hoidettu muualla
     }//GEN-LAST:event_procLoadAmount2ActionPerformed
 
     private void procLoadAmount1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_procLoadAmount1ActionPerformed
-        // TODO add your handling code here:
+        //  Prosessoreiden tÃ¤ytÃ¶n mÃ¤Ã¤rÃ¤
+    	
+    	// Jos prosessoreiden tÃ¤ytÃ¶n mÃ¤Ã¤rÃ¤n kentÃ¤ssÃ¤ painetaan enteriÃ¤
+    	// TÃ¤tÃ¤ ei siis tarvita. Hoidettu muualla
     }//GEN-LAST:event_procLoadAmount1ActionPerformed
+    
+    
+    // ---------- UPDATE ---------- //
+    
+    /**
+     * Method for updating information on the client.
+     * @throws RemoteException 
+     */
+    public void update() throws RemoteException{ //Is it okay to add throw?
+    	
+    	//>>> UPDATE LABELS <<<
+    	
+    	//Update silo labels to show amount of material
+    	int[] siiloissa = tehdas.siilojenAineMaara();
+    	
+    	for(int i = 0; i < siiloissa.length; i++){
+    		siloLabels[i].setText(Integer.toString(siiloissa[i]) + " kg");
+    	}
+    	
+    	//Update coveyer status labels
+    	for (int i = 0; i < 3; i++){
+    		if (tehdas.nappiRuuvikuljettimet()[i]){
+    			conveyerStatus[i].setText("Running");
+    		}
+    		else{
+    			conveyerStatus[i].setText("Waiting");
+    		}
+    	}
+    	
+    	//Update pump labels
+    	for (int i = 0; i < 4; i++){
+    		if (tehdas.nappiPumput()[i]){
+    			pumpStatus[i].setText("Running");
+    		}
+    		else{
+        		pumpStatus[i].setText("Waiting");
+    		}
+    	}
+    	
+
+    	//Update processor status labels 
+    	for(int i = 0; i < processorLabels.length; i++){
+    		processorLabels[i].setText(tehdas.prosessorienTila()[i]);	
+    	}
+    	
+    	
+    	//Update processor amount labels
+    	for(int i = 0; i < processorStatus.length; i++){
+    		processorStatus[i].setText(tehdas.prosessorienEdistyminen()[i]);
+    	}
+    	
+    	//Update processor user
+    	for (int i = 0; i < 3; i++){
+    		if (tehdas.nappiProsessoritReserved()[i]){
+    			processorAmount[i].setText(tehdas.prosessorinKayttaja(i));
+    		}
+    		else{
+    			processorAmount[i].setText("-");
+    		}
+    	}
+    	
+    	
+    	//Update tank labels
+    	int[] sailioissa = tehdas.sailioidenJuomanMaara();
+    	
+    	for(int i = 0; i < sailioissa.length; i++){
+    		tankLabels[i].setText(Integer.toString(sailioissa[i]) + " l");
+    	}
+    	
+    	//>>> UPDATE BUTTONS <<<
+    	
+    	//Update startSiloLoad & startProcLoad-buttons
+    	boolean[] conveyers = tehdas.nappiRuuvikuljettimet();
+    	
+    	for(int i = 0; i < conveyers.length; i++){
+    		conveyerStartButtons[i].setSelected(conveyers[i]);
+    	}
+    	
+    	//Update reserveSilo-buttons
+    	boolean[] siilonapit = tehdas.nappiSiilot();
+    	
+    	for(int i = 0; i < siilonapit.length; i++){
+    		reserveSiloButtons[i].setSelected(siilonapit[i]);
+    	}
+    	
+    	//Update startProc-buttons
+    	boolean[] prosStart = tehdas.nappiProsessoritStart();
+    	
+    	for(int i = 0; i < prosStart.length; i++){
+    		startProcessorButtons[i].setSelected(prosStart[i]);
+    	}
+    	
+    	//Update reserveProc-buttons
+    	boolean[] prosReserve = tehdas.nappiProsessoritReserved();
+    	
+    	for(int i = 0; i < prosReserve.length; i++){
+    		reserveProcessorButtons[i].setSelected(prosReserve[i]);
+    	}
+    	
+    	//Update startPump & startBPump-buttons
+    	boolean[] nappiPumput = tehdas.nappiPumput();
+    	
+    	for(int i = 0; i < nappiPumput.length; i++){
+    		startPumpButtons[i].setSelected(nappiPumput[i]);
+    	}
+    	
+    	//Update reserveTank-buttons
+    	boolean[] nappiTankit = tehdas.nappiKypsytyssailiot();
+    	
+    	for(int i = 0; i < nappiTankit.length; i++){
+    		reserveTankButtons[i].setSelected(nappiTankit[i]);
+    	}
+    	
+    }
 
     /**
      * @param args the command line arguments
@@ -1212,6 +1853,7 @@ public class MainWindow extends javax.swing.JFrame {
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
+    		
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -1229,13 +1871,24 @@ public class MainWindow extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(MainWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-
+ 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new MainWindow().setVisible(true);
+            	
+            	// Argumenttina osoite. Jos ei annettumitÃ¤Ã¤n nii oletus osoite on localhost
+            	String os;
+            	if (args.length < 1){
+            		os = "localhost";
+            	}
+            	else {
+            		os = args[0];
+            	}
+            	
+            	//MainWindow-luokan kontruktorille annetaan parametrina osoite
+                new MainWindow(os).setVisible(true);
             }
-        });
+        }); 
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
