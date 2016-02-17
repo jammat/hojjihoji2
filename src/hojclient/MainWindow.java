@@ -13,7 +13,7 @@ import java.util.UUID;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
-import hojserver.Tehdas;
+import server.tehtaanOlemus;
 
 // Kommentoin pois importit, joita ilmeisesti ei tarvita
 
@@ -25,7 +25,7 @@ public class MainWindow extends javax.swing.JFrame {
 	
 	private String osoite;
 	private String kayttajaNimi;
-	private Tehdas tehdas;
+	private tehtaanOlemus tehdas;
 	private Registry registry;
 	protected boolean online;
 	private UUID userId; 
@@ -1186,7 +1186,7 @@ public class MainWindow extends javax.swing.JFrame {
 		    	String RMIosoite ="tehdas";	
 		    	try {
 		    		registry = LocateRegistry.getRegistry(osoite, 2020);
-		    		tehdas = (Tehdas) registry.lookup(RMIosoite); 	
+		    		tehdas = (tehtaanOlemus) registry.lookup(RMIosoite); 	
 		    	} catch (Exception e){System.out.println(e);}
 		    	
 		    	// Otetaan kirjoitettu kÃ¤yttÃ¤jÃ¤nimi talteen
