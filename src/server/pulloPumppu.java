@@ -1,21 +1,18 @@
 package server;
-
-public class pulloPumppu {
 	
-	public class pulloPumppu extends Pumppu {
+	public class pulloPumppu extends pumppu {
 		
 		private sailio[] sailiot;
 		private final int take = 50;
 		private final int identity;
 		
 		private int tankToBeEmptied;
-	}
 	
 	public pulloPumppu(sailio[] sailiot, int id){
 		super();
-		this.sailiot = sailot;
+		this.sailiot = sailiot;
 		this.identity = id;
-		sailioToBeEmptied = -1;
+		tankToBeEmptied = -1;
 	}
 	
 	public int getIdentity(){
@@ -23,18 +20,18 @@ public class pulloPumppu {
 	}
 	
 	public int getSailioToBeEmptied(){
-		return sailioToBeEmptied;
+		return tankToBeEmptied;
 	}
 	
 	public void setSailioToBeEmptied(int i){
-		sailioToBeEmptied = i;
+		tankToBeEmptied = i;
 	}
 	
-	@Ovverride
-	public void stopPumppu(){
-		runnin = false;
-		if(sailioToBeEmptied != -1){
-			sailiot[sailioToBeEmptied].setTila(KoneenTila.FREE);
+	@Override
+	public void stopPump(){
+		running = false;
+		if(tankToBeEmptied != -1){
+			sailiot[tankToBeEmptied].setTila(KoneenTila.FREE);
 			setSailioToBeEmptied(-1);
 		}
 	}
@@ -43,19 +40,19 @@ public class pulloPumppu {
 		while(true){
 			
 			while(isRunning()){
-				for(int i = 0; i < sailiot.lenght; i++){
+				for(int i = 0; i < sailiot.length; i++){
 					while(isRunning() && (sailiot[i].getTila() == KoneenTila.FREE || sailiot[i].getTila() == KoneenTila.EMPTYING || sailiot[i].getTila() == KoneenTila.FULL)
-							&& sailiot[i].getAmmountOfLiquid() != && sailiot[i].isReserved() && (sailiot[i].getpulloPumppu() == identity || sailiot[i].get.pulloPumppu() == -1)){
+							&& sailiot[i].getAmountOfLiquid() != 0 && sailiot[i].isReserved() && (sailiot[i].getBottlePump() == identity || sailiot[i].getBottlePump() == -1)){
 							
-						sailioToBemptied = i;
+						tankToBeEmptied = i;
 						
 						sailiot[i].setTila(KoneenTila.EMPTYING);
-						sailiot[i].setpulloPumppu(identity);
+						sailiot[i].setBottlePump(identity);
 						
 						if(sailiot[i].getAmountOfLiquid() > take){
 							sailiot[i].takeLiquid(take);
 						} else {
-							sailiot[i].takeLiquid(tanks[i].getAmountOfLiquid());
+							sailiot[i].takeLiquid(sailiot[i].getAmountOfLiquid());
 							sailiot[i].setTila(KoneenTila.FREE);
 							sailiot[i].setReserved(false);
 							sailiot[i].setBottlePump(-1);
