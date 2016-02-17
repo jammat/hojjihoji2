@@ -2,7 +2,7 @@ package server;
 import java.rmi.*;
 import java.util.UUID;
 
-public interface tehtaanOlemus {
+public interface tehtaanOlemus extends Remote{
 	//-------- Kirjautuminen--------
 	
 		public UUID login(String kayttajaNimi) throws RemoteException; // KÃ¤yttÃ¤jÃ¤ kirjautuu
