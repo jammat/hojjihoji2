@@ -42,7 +42,7 @@ import server.sailioPumppu;
 		public UUID login(String kayttajaNimi) throws RemoteException {
 			UUID id = UUID.randomUUID();
 			userIdKeys.put(id, kayttajaNimi);
-			System.out.println("KÃ¤yttÃ¤jÃ¤ " + kayttajaNimi + ", " + id + " kirjautui sisÃ¤Ã¤n.");
+			System.out.println("kayttaja " + kayttajaNimi + ", " + id + " kirjautui sisÃ¤Ã¤n.");
 			return id;
 		}
 		
