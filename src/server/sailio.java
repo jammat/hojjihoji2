@@ -1,6 +1,6 @@
 package server;
 
-import hojserver.KoneenTila;
+import server.KoneenTila;
 
 public class sailio extends Thread{
 
