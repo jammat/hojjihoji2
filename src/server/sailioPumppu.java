@@ -1,6 +1,6 @@
 package server;
 
-import server.KoneenTila;
+import hojserver.KoneenTila;
 
 public class sailioPumppu extends pumppu{
 	private prosessori[] prosessorit;
@@ -51,6 +51,15 @@ public class sailioPumppu extends pumppu{
 				
 				if(vanhaP != -1 && prosessorit[vanhaP].getPump()==identity&&(prosessorit[vanhaP].getTila()==KoneenTila.READY||prosessorit[vanhaP].getTila()==KoneenTila.EMPTYING)&&!prosessorit[vanhaP].isEmpty()&&prosessorit[vanhaP].isReserved()){
 					processorToBeEmptied=vanhaP;
+				}
+				else{
+					findProcessor();
+				}
+				
+				if (vanhaT != -1 && sailiot[vanhaT].getPump() == identity && (sailiot[vanhaT].getTila() == KoneenTila.FREE 
+						|| sailiot[vanhaT].getTila() == KoneenTila.FILLING) && !sailiot[vanhaT].isFull() && sailiot[vanhaT].isReserved()){
+					//
+					tankToBeFilled = vanhaT;
 				}
 				else{
 					findTank();
