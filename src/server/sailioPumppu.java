@@ -1,6 +1,6 @@
 package server;
 
-import hojserver.KoneenTila;
+import server.KoneenTila;
 
 public class sailioPumppu extends pumppu{
 	private prosessori[] prosessorit;
