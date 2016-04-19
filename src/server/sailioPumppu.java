@@ -19,7 +19,7 @@ public class sailioPumppu extends pumppu{
 		tankToBeFilled=-1;
 	}
 	
-	private void findProcessor(){
+	private void findProcessor(){  //vapaan prosessorin etsiminen
 		for(int i=0;i<3;i++){
 			if((prosessorit[i].getTila()==KoneenTila.READY||prosessorit[i].getTila()==KoneenTila.EMPTYING)&&!prosessorit[i].isEmpty()&&prosessorit[i].isReserved()&&(prosessorit[i].getPump()==-1||prosessorit[i].getPump()==identity)){
 				processorToBeEmptied=i;
@@ -28,7 +28,7 @@ public class sailioPumppu extends pumppu{
 			}
 		}
 	}
-	private void findTank(){
+	private void findTank(){  //vapaan tankin etsiminen
 		for(int i=0;i<10;i++){
 			if((sailiot[i].getTila()==KoneenTila.FREE||sailiot[i].getTila()==KoneenTila.FILLING)&&!sailiot[i].isFull()&&sailiot[i].isReserved()&&(sailiot[i].getPump()==-1||sailiot[i].getPump()==identity)){
 				tankToBeFilled=i;
@@ -39,8 +39,8 @@ public class sailioPumppu extends pumppu{
 	}
 	public void run(){
 		
-		int vanhaP;
-		int vanhaT;
+		int vanhaP; //vanha prosessori
+		int vanhaT; //vanha tankki
 		
 		while(true){
 			while(isRunning()){
@@ -50,26 +50,26 @@ public class sailioPumppu extends pumppu{
 				tankToBeFilled=-1;
 				
 				if(vanhaP != -1 && prosessorit[vanhaP].getPump()==identity&&(prosessorit[vanhaP].getTila()==KoneenTila.READY||prosessorit[vanhaP].getTila()==KoneenTila.EMPTYING)&&!prosessorit[vanhaP].isEmpty()&&prosessorit[vanhaP].isReserved()){
-					processorToBeEmptied=vanhaP;
+					processorToBeEmptied=vanhaP;  //prosessorin tyhjennys
 				}
 				else{
-					findProcessor();
+					findProcessor();  //etsi vapaa prosessori
 				}
 				
 				if (vanhaT != -1 && sailiot[vanhaT].getPump() == identity && (sailiot[vanhaT].getTila() == KoneenTila.FREE 
 						|| sailiot[vanhaT].getTila() == KoneenTila.FILLING) && !sailiot[vanhaT].isFull() && sailiot[vanhaT].isReserved()){
 					//
-					tankToBeFilled = vanhaT;
+					tankToBeFilled = vanhaT;  //täytetään tähän tankkiin
 				}
 				else{
-					findTank();
+					findTank();  //etsi vapaa tankki
 				}
 				
-				if (tankToBeFilled != -1&&processorToBeEmptied != -1){
+				if (tankToBeFilled != -1&&processorToBeEmptied != -1){  //vaihdetaan koneiden tilat oikeiksi
 					sailiot[tankToBeFilled].setTila(KoneenTila.FILLING);
 					prosessorit[processorToBeEmptied].setTila(KoneenTila.EMPTYING);
 					
-					if (prosessorit[processorToBeEmptied].getProductAmount() - transferAmount
+					if (prosessorit[processorToBeEmptied].getProductAmount() - transferAmount  //lisätään erotuksen verran nestettä
 							<= 0){
 						sailiot[tankToBeFilled].addLiquid(prosessorit[processorToBeEmptied].getProductAmount());
 						prosessorit[processorToBeEmptied].emptyProcessor();
@@ -79,21 +79,21 @@ public class sailioPumppu extends pumppu{
 						sailiot[tankToBeFilled].setPump(-1);
 					}
 					
-					else if (sailiot[tankToBeFilled].getAmountOfLiquid() + transferAmount >= 10000 ){
+					else if (sailiot[tankToBeFilled].getAmountOfLiquid() + transferAmount >= 10000 ){  //ei mahdu tankkiin
 						prosessorit[processorToBeEmptied].removeProduct(10000 - sailiot[tankToBeFilled].getAmountOfLiquid());
 						sailiot[tankToBeFilled].addLiquid(10000 - sailiot[tankToBeFilled].getAmountOfLiquid());
 						prosessorit[processorToBeEmptied].setTila(KoneenTila.FREE);
 						prosessorit[processorToBeEmptied].setPump(-1);
 					}
 					else{
-						prosessorit[processorToBeEmptied].removeProduct(transferAmount);
+						prosessorit[processorToBeEmptied].removeProduct(transferAmount);  //kaikki kunnossa -> suorita operaatio
 						sailiot[tankToBeFilled].addLiquid(transferAmount);
 					}
 					
 					if (prosessorit[processorToBeEmptied].isEmpty()){
 						prosessorit[processorToBeEmptied].setTila(KoneenTila.FREE);
 						prosessorit[processorToBeEmptied].setPump(-1);
-					}
+					}                                                                   //koneiden tilat oikeiksi
 					if (sailiot[tankToBeFilled].isFull()){
 						sailiot[tankToBeFilled].setTila(KoneenTila.FULL);
 					}
@@ -117,7 +117,7 @@ public class sailioPumppu extends pumppu{
 		running = r;
 	}
 	
-	public void stopPump(){
+	public void stopPump(){  //pumpun pysäyttämismetodi
 		if (tankToBeFilled != -1 && sailiot[tankToBeFilled].getTila() == KoneenTila.FILLING){
 			sailiot[tankToBeFilled].setTila(KoneenTila.FREE);
 		}
