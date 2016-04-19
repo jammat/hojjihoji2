@@ -1,6 +1,6 @@
 package server;
 
-import server.KoneenTila;
+import hojserver.KoneenTila;
 
 public class sailio extends Thread{
 
@@ -18,7 +18,7 @@ public class sailio extends Thread{
 		pump=-1;
 		bottlepump=-1;
 	}
-	public void setTila(KoneenTila t){
+	public void setTila(KoneenTila t){ //asettaa tilan
 		if(t == KoneenTila.FREE){
 			setPump(-1);
 			setBottlePump(-1);
@@ -26,15 +26,15 @@ public class sailio extends Thread{
 		tila = t;
 	}
 	
-	public KoneenTila getTila(){
+	public KoneenTila getTila(){ //palauttaa tilan
 		return tila;
 	}
 	
-	public synchronized boolean isReserved(){
+	public synchronized boolean isReserved(){  //palauttaa, onko sailio varattu
 		return reserved;
 	}
 	
-	public synchronized void setReserved(boolean r){
+	public synchronized void setReserved(boolean r){  //asetetaan sailio varatuksi
 		if(r == false){
 			setBottlePump(-1);
 			if(isFull()){
@@ -46,7 +46,7 @@ public class sailio extends Thread{
 		reserved = r;
 	}
 	
-	public boolean isFull(){
+	public boolean isFull(){  //totuusarvo sailion tayttoasteesta
 		if (amountOfLiquid >= tilavuus){
 			return true;
 		}
@@ -54,33 +54,33 @@ public class sailio extends Thread{
 			return false;
 		}
 	}
-	public int getPump(){
+	public int getPump(){  //palauttaa pumpun
 		return pump;
 	}
 	
-	public void setPump(int p){
+	public void setPump(int p){  //asettaa pumpun
 		pump = p;
 	}
 	
-	public int getBottlePump(){
+	public int getBottlePump(){ //palauttaa pullopumpun
 		return bottlepump;
 	}
 	
-	public void setBottlePump(int p){
+	public void setBottlePump(int p){  //asettaa pullopumpun
 		bottlepump = p;
 	}
 	
-	public synchronized int getAmountOfLiquid(){
+	public synchronized int getAmountOfLiquid(){  //palauttaa nestemaaran
 		return amountOfLiquid;
 	}
 	
-	public synchronized void takeLiquid(int amount){
+	public synchronized void takeLiquid(int amount){  // ottaa nestetta
 		if(amount <= amountOfLiquid){
 			amountOfLiquid -= amount;
 		}
 	}
 	
-	public synchronized void addLiquid(int amount){
+	public synchronized void addLiquid(int amount){  // lisaa nestetta
 		if(amount <=  tilavuus - amountOfLiquid){
 			amountOfLiquid += amount;
 		}
