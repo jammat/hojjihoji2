@@ -15,20 +15,20 @@ package server;
 		tankToBeEmptied = -1;
 	}
 	
-	public int getIdentity(){
+	public int getIdentity(){  // palauttaa sailiopumpun numeron
 		return identity;
 	}
 	
-	public int getSailioToBeEmptied(){
+	public int getSailioToBeEmptied(){  // palauttaa tyhjennettavan sailion
 		return tankToBeEmptied;
 	}
 	
-	public void setSailioToBeEmptied(int i){
+	public void setSailioToBeEmptied(int i){  // asettaa tyhjennettavan sailion
 		tankToBeEmptied = i;
 	}
 	
 	@Override
-	public void stopPump(){
+	public void stopPump(){  // pysayttaa pumpun ja asettaa sailion vapaaksi
 		running = false;
 		if(tankToBeEmptied != -1){
 			sailiot[tankToBeEmptied].setTila(KoneenTila.FREE);
@@ -46,15 +46,15 @@ package server;
 							
 						tankToBeEmptied = i;
 						
-						sailiot[i].setTila(KoneenTila.EMPTYING);
-						sailiot[i].setBottlePump(identity);
+						sailiot[i].setTila(KoneenTila.EMPTYING);  // koneen tila oikeaksi
+						sailiot[i].setBottlePump(identity);  // asettaa pullopumpun
 						
 						if(sailiot[i].getAmountOfLiquid() > take){
-							sailiot[i].takeLiquid(take);
+							sailiot[i].takeLiquid(take);  // kaikki kunnossa -> otetaan nesteet
 						} else {
-							sailiot[i].takeLiquid(sailiot[i].getAmountOfLiquid());
-							sailiot[i].setTila(KoneenTila.FREE);
-							sailiot[i].setReserved(false);
+							sailiot[i].takeLiquid(sailiot[i].getAmountOfLiquid());  // otetaan se mita on
+							sailiot[i].setTila(KoneenTila.FREE);  // koneen tila oikeaksi
+							sailiot[i].setReserved(false);  // palautetaan palautetaan sailio alkutilaan
 							sailiot[i].setBottlePump(-1);
 							setSailioToBeEmptied(-1);
 						}
