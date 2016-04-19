@@ -10,13 +10,13 @@ public class ruuvikuljetin extends Thread{
 		
 	}
 	
-	public void setRunning (boolean r){
+	public void setRunning (boolean r){  // asetetaan kaynnistymaan
 		running=r;
 	}
-	public boolean isRunning(){
+	public boolean isRunning(){  // onko kaynnissa
 		return running;
 	}
-	public void setLimit(int l){
+	public void setLimit(int l){  // asetetaan raja.
 		
 	}
 }
