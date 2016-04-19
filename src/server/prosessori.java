@@ -36,7 +36,6 @@ import java.util.UUID;
  	} 
  
  
- 	//----------- RUN-METODI --------------
   	
   	public void run(){
   		
@@ -77,40 +76,40 @@ import java.util.UUID;
  		}
   	}
  	
- 	public void setUser(String k){
+ 	public void setUser(String k){  // aseta kayttaja
  		user = k;
  	}
  	
- 	public String getUser(){
+ 	public String getUser(){ // palauta kayttaja
  		return user;
  	}
  	
- 	public UUID getUserId(){
+ 	public UUID getUserId(){ // palauttaa UUID:n
  		return userId;
  	}
  	
- 	public void setUserId(UUID id){
+ 	public void setUserId(UUID id){  // asettaa UUID:n
  		userId = id;
  	}
  	
- 	public void setConveyer(int c){
+ 	public void setConveyer(int c){  // asettaa kuljettimen
  		conveyer = c;
  	}
  	
- 	public int getConveyer(){
+ 	public int getConveyer(){  // palauttaa kuljettimen
  		return conveyer;
  	}
  	
- 	public void setPump(int p){
+ 	public void setPump(int p){  // asettaa pumpun
  		pump = p;
  	}
  	
- 	public int getPump(){
+ 	public int getPump(){  // palauttaa pumpun
  		return pump;
  	}
  	
  	
- 	public void setReserved(boolean r){
+ 	public void setReserved(boolean r){  // asettaa varauksen
  	
  		if(r == false && tila != KoneenTila.PROCESSING){
  			reserved = r;
@@ -131,7 +130,7 @@ import java.util.UUID;
  			}
  		}
  	}
- 	public void setRunning(boolean r){
+ 	public void setRunning(boolean r){  // aseta kayntiin
  		
  		if(r == true){
  			if(reserved && tila != KoneenTila.EMPTYING && tila != KoneenTila.FILLING && tila != KoneenTila.READY && !isEmpty() && getProductAmount() == 0){
@@ -157,80 +156,80 @@ import java.util.UUID;
  			}
  		}
  	}
- 	public int getWaterAmount(){
+ 	public int getWaterAmount(){  // palauttaa nesteen maaran
  		return waterAmount;			
  	}
  	
- 	public int getMaterialAmount(){
+ 	public int getMaterialAmount(){  // palauttaa materiaalin maaran
  		return materialAmount;
  	}
  	
- 	public void addMaterial(int maara){
+ 	public void addMaterial(int maara){  // lisaa materiaalia
  		materialAmount += maara;
  		if(isFull()){
  			setTila(KoneenTila.FULL);
  		}
  	}
  	
- 	public void emptyProcessor(){
+ 	public void emptyProcessor(){  // tyhjentaa prosessorin
  		waterAmount = 0;
  		materialAmount = 0;
  		productAmount = 0;
  	}
  	 
- 	public int getMaterialAmountVolume(){
+ 	public int getMaterialAmountVolume(){  // palauttaa materiaalin maaran
  		return materialAmountVolume;
  	}
  	
  	
- 	public void makeProduct(){
+ 	public void makeProduct(){  // valmistaa tuotetta
  		productAmount = 5 * materialAmount;
  	}
  	
  	
- 	public void removeProduct(int amount){
+ 	public void removeProduct(int amount){  // poistaa tuotetta
  		productAmount = productAmount - amount;
  	}
  	
- 	public void setProductAmount(int amount){
+ 	public void setProductAmount(int amount){  // asettaa tuotteen maaran
  		productAmount = amount;
  	}
  	
- 	public int getProductAmount(){
+ 	public int getProductAmount(){  // palauttaa tuotteen maaran
  		return productAmount;
  	}
- 	public double getProgress(){
+ 	public double getProgress(){  // palauttaa etenemistilanteen
  		return progress;
  	}
  	
- 	public void addProgress(double amount){
+ 	public void addProgress(double amount){  // lisaa etenemistilannetta
  		progress += amount;
  	}
  	
- 	public void resetProgress(){
+ 	public void resetProgress(){  // resetoi etenemistilanteen
  		progress = 0;
  	}
  	
- 	public int getFillPercentage(){
+ 	public int getFillPercentage(){  // palauttaa tayttomaaran prosenteissa
  		return (int)(100 * ((double)materialAmount / (double)materialAmountVolume) ); 
  	}
  	
- 	public int getProductPercentage(){
+ 	public int getProductPercentage(){  // palauttaa tuotteen prosentit
  		return (int) (100 * ((double)productAmount / (double)waterAmountVolume));
  	}
  	
-	public void setTila(KoneenTila t){
+	public void setTila(KoneenTila t){  // asettaa tilan laitteelle
  		if(t == KoneenTila.FREE || t == KoneenTila.FILLING || t == KoneenTila.PROCESSING){
  			progress = 0;
  		}
  		tila = t;
  	}
  	
- 	public KoneenTila getTila(){
+ 	public KoneenTila getTila(){  // palauttaa laitteen tilan
  		return tila;
  	}
  	
- 	public boolean isFull(){
+ 	public boolean isFull(){  // palauttaa totuusarvon, onko taynna
  		if (materialAmount >= materialAmountVolume){
  			return true;
  		}
@@ -239,15 +238,15 @@ import java.util.UUID;
  		}
  	}
  	
- 	public boolean isEmpty(){
+ 	public boolean isEmpty(){  // palauttaa totuusarvon, onko tyhja
  		return (materialAmount == 0 && waterAmount == 0 && productAmount == 0);
  	}
  	
- 	public boolean isReserved(){
+ 	public boolean isReserved(){  // palauttaa totuusarvon, onko varattu
  		return reserved;
  	}
  	
- 	public boolean isRunning(){
+ 	public boolean isRunning(){  // palauttaa totuusarvon, onko kaynnissa
  		return running;
  	}
  	 	 	
