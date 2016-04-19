@@ -8,14 +8,14 @@ public class pumppu extends Thread{
 		running=false;
 	}
 	
-	public void runPump(){
+	public void runPump(){  // kaynnistetaan pumppu
 		running=true;
 	}
-	public void stopPump(){
+	public void stopPump(){  // pysaytetaan pumppu
 		running=false;
 	}
 	
-	public boolean isRunning(){
+	public boolean isRunning(){  // onko kaynnissa
 		return running;
 	}
 }
