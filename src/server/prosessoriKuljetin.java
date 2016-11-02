@@ -1,9 +1,9 @@
 package server;
 
-import server.ruuvikuljetin;
-import server.KoneenTila;
-import server.prosessori;
-import server.siilo;
+import hojserver.ruuvikuljetin;
+import hojserver.KoneenTila;
+import hojserver.prosessori;
+import hojserver.siilo;
 
 public class prosessoriKuljetin extends ruuvikuljetin {
 	
