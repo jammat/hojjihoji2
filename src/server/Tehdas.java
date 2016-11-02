@@ -3,14 +3,14 @@ import java.rmi.*;
 import java.rmi.server.*;
 import java.util.Hashtable;
 import java.util.UUID;
-import server.prosessori;
-import server.KoneenTila;
-import server.prosessoriKuljetin;
-import server.pulloPumppu;
-import server.siilo;
-import server.siiloKuljetin;
-import server.sailio;
-import server.sailioPumppu;
+import hojserver.prosessori;
+import hojserver.KoneenTila;
+import hojserver.prosessoriKuljetin;
+import hojserver.pulloPumppu;
+import hojserver.siilo;
+import hojserver.siiloKuljetin;
+import hojserver.sailio;
+import hojserver.sailioPumppu;
 
 
 
@@ -42,7 +42,7 @@ import server.sailioPumppu;
 		public UUID login(String kayttajaNimi) throws RemoteException {
 			UUID id = UUID.randomUUID();
 			userIdKeys.put(id, kayttajaNimi);
-			System.out.println("kayttaja " + kayttajaNimi + ", " + id + " kirjautui sisÃ¤Ã¤n.");
+			System.out.println("KÃ¤yttÃ¤jÃ¤ " + kayttajaNimi + ", " + id + " kirjautui sisÃ¤Ã¤n.");
 			return id;
 		}
 		
@@ -54,7 +54,7 @@ import server.sailioPumppu;
 		// ULOSKIRJOITUS
 		public void logout(UUID idKey) throws RemoteException {
 			System.out.println("kayttaja " + userIdKeys.get(idKey) + ", " + idKey + " kirjautui ulos.");
-				userIdKeys.remove(idKey);
+			userIdKeys.remove(idKey);
 		}
 		
 		//-------- Ruuvikuljettimet -------------
@@ -329,7 +329,7 @@ import server.sailioPumppu;
 			//Ruuvikuljettimet, 3 kpl
 			for(int i = 0; i < ruuvikuljettimet.length; i++){
 				if(i == 0){
-					ruuvikuljettimet[i] = new ruuvikuljetin(siilot);
+					ruuvikuljettimet[i] = new siiloKuljetin(siilot);
 					ruuvikuljettimet[i].start(); //Start thread
 				} else {
 					ruuvikuljettimet[i] = new prosessoriKuljetin(siilot, prosessorit, i);
