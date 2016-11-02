@@ -6,18 +6,23 @@
 package hojclient;
 
 import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.UUID;
+
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
-import server.tehtaanOlemus;
+import hojserver.tehtaanOlemus;
 
+// Kommentoin pois importit, joita ilmeisesti ei tarvita
 
-
-
+/**
+ *
+ * @author jaanle
+ */
 public class MainWindow extends javax.swing.JFrame {
 	
 	private String osoite;
@@ -1874,13 +1879,7 @@ public class MainWindow extends javax.swing.JFrame {
             public void run() {
             	
             	// Argumenttina osoite. Jos ei annettumitÃ¤Ã¤n nii oletus osoite on localhost
-            	String os;
-            	if (args.length < 1){
-            		os = "localhost";
-            	}
-            	else {
-            		os = args[0];
-            	}
+            	String os="localhost";
             	
             	//MainWindow-luokan kontruktorille annetaan parametrina osoite
                 new MainWindow(os).setVisible(true);
